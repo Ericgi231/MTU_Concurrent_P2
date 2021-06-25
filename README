@@ -1,0 +1,92 @@
+Question 1:
+main:
+My program starts in main and takes a file passed in through standard in.
+It reads that file and stores it in local memory logically given what 
+the data represents.
+Shared memery is then created (explained in question 3) and the values 
+are moved to shared memory.
+Two children are then created, one runs qsort and the other merge, 
+the needed arguments are passed with them.
+The main program now waits for the children to finish.
+Once a child finishes, the data they changed will be printed.
+Once both children are finished the program deletes the shared memory and 
+exits.
+
+qsort:
+qsort is recursive. it takes in a left and right index and some other vars 
+needed for indexing.
+It then attaches to the shared memory and runs quick sort on the portion 
+of it that represents array 0.
+The range it covered is updated in shared memory then it calls itself from 
+within children twice, 
+with left and right indexes that cut the array into two halves based on 
+the logic of the quick sort.
+Once all the recursion is done, the data in shared memory has been sorted 
+and the program exits.
+
+merge:
+merge takes in vars needed for indexing.
+It then attaches to the shared memory and creates a child for each value 
+in array 1 and 2.
+Each child determines where its data belongs in array 3 based on a modified 
+binary search.
+Once every child is dead, they have all completed their jobs and array 3 is 
+filled.
+The program then exits.
+
+Question 2:
+The program works because the shared memory created in main remains active 
+on the computer until main finishes.
+merge and qsort do their jobs on the data in the shared memory while making 
+sure to never edit the same points at the same time.
+Because of this no race condition can exist.
+The program generates its shared memory key using the current directory and
+all files are in the same directory, so the keys will always match.
+All printing is done atomic so no text can be merged or split up.
+The main program only deletes the shared memory and exits after the children 
+are done.
+
+Question 3:
+The program makes use of one shared memory segment.
+This segment is an array of ints that can hold all three of the arrays input 
+through the file,
+it also has room for a 4th array (array 3) that is the size of array 1 and 2 
+combined as it is a merge of the two.
+The lengths of each array before the desired array is used to determine where 
+each array starts.
+
+In qsort, each step of the sort will update a portion of array 0 as each step 
+completes.
+In merge, each child will update a single index in array 3, every index is 
+touched once.
+
+Question 4:
+There are no potential race conditions.
+
+In qsort, the entire array 0 is updated before it spawns children. 
+Each child is given half of the array
+and will never be touching the same data the other child is.
+This repeats until all data is done, at no point do two processes 
+change the same data at the same time.
+They only change data that has already been updated by their parents.
+
+In merge, the values being updated all start at 0 and every child is given 
+one index.
+They never overlap and change the same index.
+
+Question 5:
+The argument list is constructed by creating a pointer to an array of 
+strings length 10.
+Each needed string is allocated memory then the desired value is copied 
+into it.
+The first value is the executable for qsort, then the left and right 
+indexes used for quick sort,
+and the k, m, and n values needed to index the shared memory.
+Finally the last string is set to NULL as a terminator.
+For the inital pass from main to qsort, left is 0 and right is k-1.
+This starts qsort on the entire array 0 range.
+
+Question 6:
+The logic is the same as with qsort.
+In this case the only arguments needed are k, m, and n.
+Everything else is the same.
